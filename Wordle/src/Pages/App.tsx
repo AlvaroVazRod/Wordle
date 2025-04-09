@@ -4,21 +4,18 @@ import { Board } from "../Components/Boards/Board";
 import { RespuestaComprobacion, RespuestaPalabra } from "../Types/types";
 import { SlabStatus } from '../Types/types';
 import './App.css';
-import { validarPalabra } from "../utils/validarPalabra";
+import { Toaster, toast } from 'react-hot-toast';
+
 const NUM_ROWS = 6;
-const NUM_COLS = 5;
 
 function App() {
-  const [board, setBoard] = useState<string[][]>(
-    Array.from({ length: NUM_ROWS }, () => Array(NUM_COLS).fill(''))
-  );
+  const [word, setWord] = useState('');
+  const numCols = React.useMemo(() => word.length, [word]);
+  const [board, setBoard] = useState<string[][]>([]);
   const [animatedCell, setAnimatedCell] = useState<{ row: number; col: number } | undefined>(undefined);
   const [currentRow, setCurrentRow] = useState(0);
   const [currentCol, setCurrentCol] = useState(0);
-  const [word, setWord] = useState('');
-  const [statusMatrix, setStatusMatrix] = useState<SlabStatus[][]>(
-    Array.from({ length: NUM_ROWS }, () => Array(NUM_COLS).fill(''))
-  );
+  const [statusMatrix, setStatusMatrix] = useState<SlabStatus[][]>([]);
   const [keyStatus, setKeyStatus] = useState<Record<string, SlabStatus>>({});
   const obtenerPalabra = async () => {
     try {
@@ -32,8 +29,17 @@ function App() {
   useEffect(() => {
     obtenerPalabra();
   }, []);
+  useEffect(()=>{
+    if (!word) return;
+    const cols = word.length;
+    setBoard(Array.from({ length: NUM_ROWS }, () => Array(cols).fill('')));
+    setStatusMatrix(Array.from({ length: NUM_ROWS }, () => Array(cols).fill('')));
+    setCurrentRow(0);
+    setCurrentCol(0);
+    setKeyStatus({});
+  }, [word]);
   const handleKeyPress = (letter: string) => {
-    if (currentCol >= NUM_COLS || currentRow >= NUM_ROWS) return;
+    if (currentCol >= numCols || currentRow >= NUM_ROWS) return;
 
     const newBoard = board.map((row, i) =>
       i === currentRow ? [...row] : row
@@ -54,9 +60,10 @@ function App() {
       setCurrentCol(currentCol - 1);
     }
   }
-  const handleEnter = async() => {
-    if (currentCol < NUM_COLS) {
-      alert('No hay suficientes letras meter toast');
+  const handleEnter = async () => {
+    if (!board.length || !board[0].length) return;
+    if (currentCol < numCols) {
+      toast("No hay suficientes letras.");
       return;
     }
     const palabraJugada = board[currentRow].join('').toLowerCase();
@@ -68,10 +75,10 @@ function App() {
         },
         body: JSON.stringify({ intento: palabraJugada, solucion: word }),
       });
-  
+
       const data = await response.json();
       const result = data.resultado as SlabStatus[];
-  
+
       const newStatusMatrix = statusMatrix.map((row, i) =>
         i === currentRow ? result : row
       );
@@ -79,7 +86,7 @@ function App() {
       const newKeyStatus = { ...keyStatus };
       result.forEach((status, index) => {
         const letter = palabraJugada[index];
-        if (newKeyStatus[letter] !== 'correct') {  
+        if (newKeyStatus[letter] !== 'correct') {
           newKeyStatus[letter] = status;
         }
       });
@@ -89,13 +96,13 @@ function App() {
         }
       });
       setKeyStatus(newKeyStatus);
-  
+
       if (palabraJugada === word.toLowerCase()) {
-        alert("¡Correcto! meter toast");
+        toast.success("Correcto");
       } else if (currentRow === NUM_ROWS - 1) {
-        alert(`Fallaste. La palabra era: ${word} meter toast `);
+        toast.error(`Fallaste. La palabra era: ${word}.`);
       }
-  
+
       setCurrentRow(currentRow + 1);
       setCurrentCol(0);
     } catch (error) {
@@ -116,6 +123,13 @@ function App() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [board, currentCol, currentRow]);
+  if (!word || numCols===0) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-xl">Cargando...</p>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center p-6 gap-6">
       <h1 className="text-3xl font-bold mb-4">Wordle</h1>
@@ -124,7 +138,27 @@ function App() {
         onBackSpace={handleBackSpace}
         onEnter={handleEnter}
         keyStatus={keyStatus} />
+        <Toaster 
+         toastOptions={{
+          style: {
+            background: '#1f2937', // gray-800
+            color: '#fff',
+          },
+          success: {
+            iconTheme: {
+              primary: '#22c55e', // green-500
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444', // red-500
+              secondary: '#fff',
+            },
+          },
+        }}/>
     </div>
+
   );
 }
 export default App;
