@@ -19,8 +19,9 @@ function App() {
   const [keyStatus, setKeyStatus] = useState<Record<string, SlabStatus>>({});
   const obtenerPalabra = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/obtener_palabra");
+      const response = await fetch("/api/comprobar_palabra");
       const data: RespuestaPalabra = await response.json();
+      console.log("Fetching palabra...");
       setWord(data.palabra);
     } catch (error) {
       console.error("Error al obtener la palabra", error);
@@ -37,6 +38,7 @@ function App() {
     setCurrentRow(0);
     setCurrentCol(0);
     setKeyStatus({});
+    console.log({word});
   }, [word]);
   const handleKeyPress = (letter: string) => {
     if (currentCol >= numCols || currentRow >= NUM_ROWS) return;
@@ -68,13 +70,16 @@ function App() {
     }
     const palabraJugada = board[currentRow].join('').toLowerCase();
     try {
-      const response = await fetch("http://localhost:8000/api/comprobar_palabra", {
+      const response = await fetch("/api/comprobar_palabra", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ intento: palabraJugada, solucion: word }),
       });
+      if(!response.ok){
+        throw new Error("Conexion Fallida");
+      }
 
       const data = await response.json();
       const result = data.resultado as SlabStatus[];

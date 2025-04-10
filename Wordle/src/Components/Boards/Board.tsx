@@ -12,7 +12,7 @@ interface Props {
 export const Board: React.FC<Props> = ({ character, animatedCell, statusMatrix }) => {
     const numCols = character[0]?.length || 0;
     return (
-        <div className="grid gap-2" style={{ gridTemplateRows: `repeat(${character.length}, 1fr)` }}>
+        <div className="grid gap-2" style={{ gridTemplateRows: `repeat(${character[0]?.length}, 1fr)` }}>
             {character.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex gap-2 w-full">
                     {row.map((letter, colIndex) => {

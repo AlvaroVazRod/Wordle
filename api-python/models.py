@@ -6,9 +6,8 @@ from database import Base
 CellStatus = Literal["correct", "present", "absent"]
 class Palabra(Base):
     __tablename__ = "palabras"
-
     id = Column(Integer, primary_key=True, index=True)
-    texto = Column(String(5), unique=True, index=True)
+    texto = Column(String, unique=True, index=True)
     
 class PalabraRequest(BaseModel):
     intento: str
