@@ -7,7 +7,7 @@ from sqlalchemy.future import select
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    palabras = ["nubesd", "perrof", "sillaf", "luzcof", "mismof", "cantof", "mañana"]
+    palabras = ["nube", "perro", "sillas", "lucidos", "mi", "cartera", "multiplicacion"]
     async with engine.begin() as conn:
         for palabra in palabras:
             result = await conn.execute(select(Palabra).filter_by(texto=palabra))

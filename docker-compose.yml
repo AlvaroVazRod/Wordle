@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: ./api-python
-      dockerfile: dockerfile 
+      dockerfile: dockerfile
     container_name: backend
     ports:
       - "8000:8000"
@@ -14,16 +14,20 @@ services:
   frontend:
     build:
       context: ./Wordle
-      dockerfile: dockerfile
-      args:
-        VITE_API_URL: http://backend:8000
+      dockerfile: dockerfile.dev
     container_name: frontend
     ports:
-      - "3000:80"
-    networks:
-      - app-network
+      - "3000:3000"
+    volumes:
+      - ./Wordle:/app
+      - /app/node_modules
+    command: npm run dev -- --host
+    environment:
+      - VITE_API_URL=http://localhost:8000
     depends_on:
       - backend
+    networks:
+      - app-network
 
 networks:
   app-network:
