@@ -5,9 +5,10 @@ interface boardProps {
   onBackSpace: () => void;
   onEnter: () => void;
   keyStatus?: Record<string, SlabStatus>;
+  isGameOver: boolean;
 };
 
-export const KeyBoard: React.FC<boardProps> = ({ onButtonPress, onBackSpace, onEnter, keyStatus = {} }) => {
+export const KeyBoard: React.FC<boardProps> = ({ onButtonPress, onBackSpace, onEnter, keyStatus = {}, isGameOver }) => {
   const rows = ['qwertyuiop', 'asdfghjklñ'];
   const lastRows = "zxcvbnm";
   const getKeyColor = (letter: string) => {
@@ -31,8 +32,10 @@ export const KeyBoard: React.FC<boardProps> = ({ onButtonPress, onBackSpace, onE
           {row.split('').map((character) => (
             <button
               key={character}
-              onClick={() => onButtonPress(character)}
-              className={`bg-gray-600 px-3 py-2 rounded text-white font-semibold hover:bg-gray-500 ${getKeyColor(character)}`}
+              disabled={isGameOver}
+              onClick={() => !isGameOver && onButtonPress(character)}
+
+              className={`bg-gray-600 px-3 py-2 rounded text-white font-semibold hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed ${getKeyColor(character)}`}
             >
               {character}
             </button>
@@ -45,25 +48,26 @@ export const KeyBoard: React.FC<boardProps> = ({ onButtonPress, onBackSpace, onE
         {lastRows.split('').map((character) => (
           <button
             key={character}
+            disabled={isGameOver}
             onClick={() => onButtonPress(character)}
-            className={`bg-gray-600 px-3 py-2 rounded text-white font-semibold hover:bg-gray-500 ${getKeyColor(character)}`}
+            className={`bg-gray-600 px-3 py-2 rounded text-white font-semibold hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed ${getKeyColor(character)}`}
           >
             {character}
           </button>
         ))}
 
-        {/* Botón Borrar */}
         <button
-          onClick={onBackSpace}
-          className="bg-gray-600 px-3 py-2 rounded text-white font-semibold hover:bg-gray-500"
+          onClick={() => !isGameOver && onBackSpace()}
+          disabled={isGameOver}
+          className="bg-gray-600 px-3 py-2 rounded text-white font-semibold hover:bg-gray-500 disabled:opacity-50"
         >
           Borrar
         </button>
 
-        {/* Botón Enter */}
         <button
-          onClick={onEnter}
-          className="bg-gray-600 px-6 py-2 rounded text-white font-semibold hover:bg-gray-500"
+          onClick={() => !isGameOver && onEnter()}
+          className="bg-gray-600 px-6 py-2 rounded text-white font-semibold hover:bg-gray-500 disabled:opacity-50"
+          disabled={isGameOver}
         >
           Enter
         </button>
